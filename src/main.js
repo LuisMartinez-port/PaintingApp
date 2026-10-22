@@ -1,84 +1,85 @@
 import { Application, Assets, Sprite, Rectangle  } from "pixi.js";
 import ToolsManager from "./managers/ToolsManager.js";
-
+import DrawManager from "./managers/DrawingManager.js";
+ 
 import "../style.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-
+ 
 (async () => {
     // Create a new application
     const app = new Application();
-
+ 
     // Initialize the application
     const container = document.getElementById("pixi-container");
-    
+ 
     await app.init({
         background: "#aaaaaa",
         resizeTo: container
     });
-
+ 
+    // Start listening for click-and-drag on the canvas.
+    DrawManager.initialize(app);
+ 
     ToolsManager.addToolGroup("Shapes",["fa-solid","fa-shapes"], [
         ToolsManager.getTool("Ellipse",["fa-regular","fa-circle"], () => {
-            
-            
+            DrawManager.selectCircle();
         }),
         ToolsManager.getTool("Rectangle",["fa-regular","fa-square"], () => {
-            
-            
+            DrawManager.selectRectangle();
         }),
         ToolsManager.getTool("Line",["fa-solid","fa-lines-leaning"], () => {
-            
-            
+            DrawManager.selectLine();
         }),
         ToolsManager.getTool("Star",["fa-regular","fa-star"], () => {
-            
-            
+            DrawManager.selectStar();
         })
     ]);
-    
+ 
     let fillColorPicker = ToolsManager.getColorPicker("Fill Color");
     let strokeColorPicker = ToolsManager.getColorPicker("Stroke Color");
     let strokeInput = document.getElementById("stroke");
-
+ 
     ToolsManager.addTool(fillColorPicker);
     ToolsManager.addTool(strokeColorPicker);
-    
+ 
+    // The tools below aren't built yet. Each one calls deselect() so that
+    // picking it stops dragging from drawing shapes.
     ToolsManager.addTool(ToolsManager.getTool("Select Tool",["fa-solid","fa-arrow-pointer"], () => {
-        
+        DrawManager.deselect();
     }));
-    
+ 
     ToolsManager.addTool(ToolsManager.getTool("Move Tool",["fa-solid","fa-up-down-left-right"], () => {
-        
+        DrawManager.deselect();
     }));
-    
+ 
     ToolsManager.addTool(ToolsManager.getTool("Scale Tool",["fa-solid","fa-up-right-and-down-left-from-center"], () => {
-        
+        DrawManager.deselect();
     }));
-    
-    ToolsManager.addTool(ToolsManager.getTool("Delete Tool",["fa-solid","fa-trash-can"], () => {        
-        
+ 
+    ToolsManager.addTool(ToolsManager.getTool("Delete Tool",["fa-solid","fa-trash-can"], () => {
+        DrawManager.deselect();
     }));
-    
-    ToolsManager.addTool(ToolsManager.getTool("Group Tool",["fa-solid","fa-object-group"], () => {        
-       
+ 
+    ToolsManager.addTool(ToolsManager.getTool("Group Tool",["fa-solid","fa-object-group"], () => {
+        DrawManager.deselect();
     }));
-    
-    ToolsManager.addTool(ToolsManager.getTool("Ungroup Tool",["fa-regular","fa-object-group"], () => {        
-        
+ 
+    ToolsManager.addTool(ToolsManager.getTool("Ungroup Tool",["fa-regular","fa-object-group"], () => {
+        DrawManager.deselect();
     }));
-    
+ 
     container.appendChild(app.canvas);
-
+ 
     let undoBtn = document.getElementById("undo");
     let redoBtn = document.getElementById("redo");
-        
+ 
     undoBtn.addEventListener("click",() => {
-
+ 
     });
-    
+ 
     redoBtn.addEventListener("click",() => {
-
+ 
     });
-    
     
 
     // Load the bunny texture
