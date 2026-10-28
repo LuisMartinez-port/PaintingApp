@@ -1,6 +1,7 @@
 import { Application, Assets, Sprite, Rectangle  } from "pixi.js";
 import ToolsManager from "./managers/ToolsManager.js";
 import DrawManager from "./managers/DrawingManager.js";
+import HistoryManager from "./managers/HistoryManager.js";
  
 import "../style.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
@@ -42,43 +43,77 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
     ToolsManager.addTool(fillColorPicker);
     ToolsManager.addTool(strokeColorPicker);
  
-    // The tools below aren't built yet. Each one calls deselect() so that
-    // picking it stops dragging from drawing shapes.
     ToolsManager.addTool(ToolsManager.getTool("Select Tool",["fa-solid","fa-arrow-pointer"], () => {
-        DrawManager.deselect();
+        DrawManager.selectSelectTool();
     }));
  
+    // The tools below aren't built yet. Each one calls clearTool() so that
+    // picking it stops dragging from drawing shapes.
     ToolsManager.addTool(ToolsManager.getTool("Move Tool",["fa-solid","fa-up-down-left-right"], () => {
-        DrawManager.deselect();
+        DrawManager.clearTool();
     }));
  
     ToolsManager.addTool(ToolsManager.getTool("Scale Tool",["fa-solid","fa-up-right-and-down-left-from-center"], () => {
-        DrawManager.deselect();
+        DrawManager.clearTool();
     }));
  
     ToolsManager.addTool(ToolsManager.getTool("Delete Tool",["fa-solid","fa-trash-can"], () => {
-        DrawManager.deselect();
+        DrawManager.clearTool();
     }));
  
     ToolsManager.addTool(ToolsManager.getTool("Group Tool",["fa-solid","fa-object-group"], () => {
-        DrawManager.deselect();
+        DrawManager.clearTool();
     }));
  
     ToolsManager.addTool(ToolsManager.getTool("Ungroup Tool",["fa-regular","fa-object-group"], () => {
-        DrawManager.deselect();
+        DrawManager.clearTool();
     }));
  
     container.appendChild(app.canvas);
  
     let undoBtn = document.getElementById("undo");
     let redoBtn = document.getElementById("redo");
+
+    const undo = () => {
+        DrawManager.cancelInProgress();
+        HistoryManager.undo();
+    };
+
+    const redo = () => {
+        DrawManager.cancelInProgress();
+        HistoryManager.redo();
+    };
  
-    undoBtn.addEventListener("click",() => {
- 
-    });
- 
-    redoBtn.addEventListener("click",() => {
- 
+    undoBtn.addEventListener("click", undo);
+    redoBtn.addEventListener("click", redo);
+
+    // Grey out the buttons when there's nothing to undo or redo.
+    const updateUndoRedoButtons = () => {
+        undoBtn.disabled = !HistoryManager.canUndo();
+        redoBtn.disabled = !HistoryManager.canRedo();
+    };
+    HistoryManager.ChangedEvent.addListener(updateUndoRedoButtons);
+    updateUndoRedoButtons();
+
+    // Keyboard shortcuts: Ctrl+Z to undo, Ctrl+Y or Ctrl+Shift+Z to redo.
+    document.addEventListener("keydown", (event) => {
+        
+        if (event.target.tagName === "INPUT") {
+            return;
+        }
+        if (!event.ctrlKey && !event.metaKey) {
+            return;
+        }
+
+        const key = event.key.toLowerCase();
+
+        if (key === "z" && !event.shiftKey) {
+            event.preventDefault();
+            undo();
+        } else if (key === "y" || (key === "z" && event.shiftKey)) {
+            event.preventDefault();
+            redo();
+        }
     });
     
 

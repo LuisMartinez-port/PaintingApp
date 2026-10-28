@@ -1,4 +1,6 @@
 import { Graphics } from "pixi.js";
+import HistoryManager from "../managers/HistoryManager.js";
+import DrawAction from "../actions/DrawAction.js";
 
 class Draw {
 
@@ -15,10 +17,10 @@ class Draw {
         
     graphics = null;
 
-    constructor(stage) {
-
-        this.stage = stage;
+    constructor(layer) {
+        this.layer = layer;
     }
+
 
     get isDrawing() {
         return this.graphics !== null;
@@ -29,7 +31,7 @@ class Draw {
         this.end = {x: position.x, y: position.y};
 
         this.graphics = new Graphics();
-        this.stage.addChild(this.graphics);
+        this.layer.addChild(this.graphics);
         this.redraw();
 
     }
@@ -46,7 +48,7 @@ class Draw {
 
     onPointerUp(position){
         if (!this.isDrawing) {
-            return null;
+            return;
         }
 
         this.end = {x: position.x, y: position.y};
@@ -54,13 +56,14 @@ class Draw {
 
         if (this.distance() < Draw.MinimumSize) {
             this.cancel();
-            return null;
+            return;
         }
- 
-        const shape = this.graphics;
-        this.reset();
-        return shape;
 
+        const shape = this.graphics;
+        shape.removeFromParent();
+        this.reset();
+
+        HistoryManager.perform(new DrawAction(shape, this.layer));
     }
 
 
