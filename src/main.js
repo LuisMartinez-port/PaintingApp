@@ -49,16 +49,16 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
  
     // The tools below aren't built yet. Each one calls clearTool() so that
     // picking it stops dragging from drawing shapes.
-    ToolsManager.addTool(ToolsManager.getTool("Move Tool",["fa-solid","fa-up-down-left-right"], () => {
-        DrawManager.clearTool();
+     ToolsManager.addTool(ToolsManager.getTool("Move Tool",["fa-solid","fa-up-down-left-right"], () => {
+        DrawManager.selectMoveTool();
     }));
- 
+
     ToolsManager.addTool(ToolsManager.getTool("Scale Tool",["fa-solid","fa-up-right-and-down-left-from-center"], () => {
-        DrawManager.clearTool();
+        DrawManager.selectScaleTool();
     }));
- 
+
     ToolsManager.addTool(ToolsManager.getTool("Delete Tool",["fa-solid","fa-trash-can"], () => {
-        DrawManager.clearTool();
+        DrawManager.deleteSelected();
     }));
  
     ToolsManager.addTool(ToolsManager.getTool("Group Tool",["fa-solid","fa-object-group"], () => {
@@ -98,10 +98,15 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
     // Keyboard shortcuts: Ctrl+Z to undo, Ctrl+Y or Ctrl+Shift+Z to redo.
     document.addEventListener("keydown", (event) => {
         
-        if (event.target.tagName === "INPUT") {
+               if (event.target.tagName === "INPUT") {
             return;
         }
-        if (!event.ctrlKey && !event.metaKey) {
+        if (event.key === "Delete" || event.key === "Backspace") {
+            event.preventDefault();
+            DrawManager.deleteSelected();
+            return;
+        }
+               if (!event.ctrlKey && !event.metaKey) {
             return;
         }
 

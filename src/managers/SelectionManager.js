@@ -70,6 +70,24 @@ class SelectionManager {
         return null;
     }
 
+     static getSelectionBounds() {
+        if (this.selected.length === 0) {
+            return null;
+        }
+
+        let left = Infinity, top = Infinity, right = -Infinity, bottom = -Infinity;
+
+        for (const shape of this.selected) {
+            const box = shape.getBounds();
+            left = Math.min(left, box.x);
+            top = Math.min(top, box.y);
+            right = Math.max(right, box.x + box.width);
+            bottom = Math.max(bottom, box.y + box.height);
+        }
+
+        return { x: left, y: top, width: right - left, height: bottom - top };
+    }
+
     static clear() {
         this.selected = [];
         this.refresh();

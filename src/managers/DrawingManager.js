@@ -4,8 +4,11 @@ import RectDraw from "../DrawStates/RectDraw.js";
 import LineDraw from "../DrawStates/LineDraw.js";
 import StarDraw from "../DrawStates/StarDraw.js";
 import SelectState from "../DrawStates/SelectState.js";
+import MoveState from "../DrawStates/MoveState.js";
+import ScaleState from "../DrawStates/ScaleState.js";
 import SelectionManager from "./SelectionManager.js";
- 
+import HistoryManager from "./HistoryManager.js";
+import DeleteAction from "../actions/DeleteAction.js";
 
 class DrawingManager {
  
@@ -52,6 +55,25 @@ class DrawingManager {
 
     static selectSelectTool() {
         this.setTool(new SelectState(this.overlay));
+    }
+
+        static selectMoveTool() {
+        this.setTool(new MoveState());
+    }
+
+    static selectScaleTool() {
+        this.setTool(new ScaleState());
+    }
+
+   
+    static deleteSelected() {
+        const shapes = SelectionManager.getSelected();
+        if (shapes.length === 0) {
+            return;
+        }
+
+        this.cancelInProgress();
+        HistoryManager.perform(new DeleteAction(shapes));
     }
  
 
