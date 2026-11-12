@@ -61,12 +61,12 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
         DrawManager.deleteSelected();
     }));
  
-    ToolsManager.addTool(ToolsManager.getTool("Group Tool",["fa-solid","fa-object-group"], () => {
-        DrawManager.clearTool();
+        ToolsManager.addTool(ToolsManager.getTool("Group Tool",["fa-solid","fa-object-group"], () => {
+        DrawManager.groupSelected();
     }));
  
     ToolsManager.addTool(ToolsManager.getTool("Ungroup Tool",["fa-regular","fa-object-group"], () => {
-        DrawManager.clearTool();
+        DrawManager.ungroupSelected();
     }));
  
     container.appendChild(app.canvas);
@@ -112,12 +112,18 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 
         const key = event.key.toLowerCase();
 
-        if (key === "z" && !event.shiftKey) {
+                if (key === "z" && !event.shiftKey) {
             event.preventDefault();
             undo();
         } else if (key === "y" || (key === "z" && event.shiftKey)) {
             event.preventDefault();
             redo();
+        } else if (key === "g" && !event.shiftKey) {
+            event.preventDefault();
+            DrawManager.groupSelected();
+        } else if (key === "g" && event.shiftKey) {
+            event.preventDefault();
+            DrawManager.ungroupSelected();
         }
     });
     

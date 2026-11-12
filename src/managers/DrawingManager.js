@@ -9,6 +9,8 @@ import ScaleState from "../DrawStates/ScaleState.js";
 import SelectionManager from "./SelectionManager.js";
 import HistoryManager from "./HistoryManager.js";
 import DeleteAction from "../actions/DeleteAction.js";
+import GroupAction from "../actions/GroupAction.js";
+import UngroupAction from "../actions/UngroupAction.js";
 
 class DrawingManager {
  
@@ -74,6 +76,33 @@ class DrawingManager {
 
         this.cancelInProgress();
         HistoryManager.perform(new DeleteAction(shapes));
+    }
+
+     static groupSelected() {
+        const shapes = SelectionManager.getSelected();
+        if (shapes.length < 2) {
+            return;
+        }
+
+        this.cancelInProgress();
+        const action = new GroupAction(shapes, this.shapes);
+        HistoryManager.perform(action);
+        SelectionManager.setSelected([action.group]);
+    }
+
+    static ungroupSelected() {
+        const selected = SelectionManager.getSelected();
+        const groups = selected.filter((shape) => shape.isGroup);
+        if (groups.length === 0) {
+            return;
+        }
+
+        const others = selected.filter((shape) => !shape.isGroup);
+        const freed = groups.flatMap((group) => [...group.children]);
+
+        this.cancelInProgress();
+        HistoryManager.perform(new UngroupAction(groups, this.shapes));
+        SelectionManager.setSelected([...others, ...freed]);
     }
  
 

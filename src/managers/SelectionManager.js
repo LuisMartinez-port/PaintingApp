@@ -25,6 +25,11 @@ class SelectionManager {
         return [...this.selected];
     }
 
+    static setSelected(shapes) {
+        this.selected = [...shapes];
+        this.refresh();
+    }
+
      static selectInRect(rect, additive = false) {
         const area = toCenterRect(rect);
 
