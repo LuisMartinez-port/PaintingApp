@@ -2,12 +2,19 @@ import Draw from "./Draw.js";
  
 class DrawRectState extends Draw {
  
-    draw(graphics) {
+    outline() {
         const { x, y, width, height } = this.bounds();
- 
-        graphics.rect(x, y, width, height);
+
+        return {
+            points: [
+                { x, y },
+                { x: x + width, y },
+                { x: x + width, y: y + height },
+                { x, y: y + height },
+            ],
+            closed: true,
+        };
     }
 }
  
 export default DrawRectState;
- 

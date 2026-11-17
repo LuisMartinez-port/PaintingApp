@@ -2,6 +2,8 @@ import { Application, Assets, Sprite, Rectangle  } from "pixi.js";
 import ToolsManager from "./managers/ToolsManager.js";
 import DrawManager from "./managers/DrawingManager.js";
 import HistoryManager from "./managers/HistoryManager.js";
+import StyleManager from "./managers/StyleManager.js";
+import {TriangleDraw,DiamondDraw,PentagonDraw,HexagonDraw,ArrowDraw,} from "./DrawStates/PolygonDraw.js";
  
 import "../style.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
@@ -35,6 +37,23 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
             DrawManager.selectStar();
         })
     ]);
+        ToolsManager.addToolGroup("Custom Shapes",["fa-solid","fa-draw-polygon"], [
+        ToolsManager.getTool("Triangle",["fa-solid","fa-caret-up"], () => {
+            DrawManager.selectCustomShape(TriangleDraw);
+        }),
+        ToolsManager.getTool("Diamond",["fa-solid","fa-diamond"], () => {
+            DrawManager.selectCustomShape(DiamondDraw);
+        }),
+        ToolsManager.getTool("Pentagon",["fa-solid","fa-draw-polygon"], () => {
+            DrawManager.selectCustomShape(PentagonDraw);
+        }),
+        ToolsManager.getTool("Hexagon",["fa-solid","fa-dice-d6"], () => {
+            DrawManager.selectCustomShape(HexagonDraw);
+        }),
+        ToolsManager.getTool("Arrow",["fa-solid","fa-arrow-right"], () => {
+            DrawManager.selectCustomShape(ArrowDraw);
+        })
+    ]);
  
     let fillColorPicker = ToolsManager.getColorPicker("Fill Color");
     let strokeColorPicker = ToolsManager.getColorPicker("Stroke Color");
@@ -42,6 +61,79 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
  
     ToolsManager.addTool(fillColorPicker);
     ToolsManager.addTool(strokeColorPicker);
+        
+    const startStyle = StyleManager.current();
+    fillColorPicker.value = StyleManager.toHex(startStyle.fillColor);
+    strokeColorPicker.value = StyleManager.toHex(startStyle.strokeColor);
+    strokeInput.value = startStyle.strokeWidth;
+
+    
+    const changeStyle = (changes) => {
+        StyleManager.update(changes);
+        DrawManager.restyleSelected(changes);
+    };
+
+   
+    fillColorPicker.addEventListener("change", () => {
+        changeStyle({ fillColor: fillColorPicker.getDecimal() });
+    });
+
+    strokeColorPicker.addEventListener("change", () => {
+        changeStyle({ strokeColor: strokeColorPicker.getDecimal() });
+    });
+
+    strokeInput.addEventListener("change", () => {
+        const width = Math.max(0, Number(strokeInput.value) || 0);
+        strokeInput.value = width;
+        changeStyle({ strokeWidth: width });
+    });
+
+   
+    const svgIcon = (inner) =>
+        `<svg width="30" height="30" viewBox="0 0 24 24">${inner}</svg>`;
+
+    const outlineSquare = `<rect x="3" y="3" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"/>`;
+
+    const FILL_ICONS = {
+        solid: `<rect x="3" y="3" width="18" height="18" fill="currentColor"/>`,
+        striped: outlineSquare + `<path d="M3 15 L15 3 M3 21 L21 3 M9 21 L21 9" stroke="currentColor" stroke-width="2"/>`,
+        none: outlineSquare,
+    };
+
+    const BORDER_ICONS = {
+        solid: `<line x1="2" y1="12" x2="22" y2="12" stroke="currentColor" stroke-width="3"/>`,
+        dashed: `<line x1="2" y1="12" x2="22" y2="12" stroke="currentColor" stroke-width="3" stroke-dasharray="5 3"/>`,
+        dotted: `<line x1="3" y1="12" x2="22" y2="12" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="0.1 5"/>`,
+    };
+
+    const fillTypeTool = ToolsManager.getTool("", [], () => {
+        const fillType = StyleManager.next(StyleManager.FILL_TYPES, StyleManager.current().fillType);
+        changeStyle({ fillType });
+        showFillType();
+    });
+
+    const showFillType = () => {
+        const fillType = StyleManager.current().fillType;
+        fillTypeTool.innerHTML = svgIcon(FILL_ICONS[fillType]);
+        fillTypeTool.title = `Fill: ${fillType} (click to change)`;
+    };
+
+    const borderTypeTool = ToolsManager.getTool("", [], () => {
+        const strokeType = StyleManager.next(StyleManager.STROKE_TYPES, StyleManager.current().strokeType);
+        changeStyle({ strokeType });
+        showBorderType();
+    });
+
+    const showBorderType = () => {
+        const strokeType = StyleManager.current().strokeType;
+        borderTypeTool.innerHTML = svgIcon(BORDER_ICONS[strokeType]);
+        borderTypeTool.title = `Border: ${strokeType} (click to change)`;
+    };
+
+    showFillType();
+    showBorderType();
+    ToolsManager.addTool(fillTypeTool);
+    ToolsManager.addTool(borderTypeTool);
  
     ToolsManager.addTool(ToolsManager.getTool("Select Tool",["fa-solid","fa-arrow-pointer"], () => {
         DrawManager.selectSelectTool();

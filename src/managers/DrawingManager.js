@@ -11,7 +11,7 @@ import HistoryManager from "./HistoryManager.js";
 import DeleteAction from "../actions/DeleteAction.js";
 import GroupAction from "../actions/GroupAction.js";
 import UngroupAction from "../actions/UngroupAction.js";
-
+import StyleAction from "../actions/StyleAction.js";
 class DrawingManager {
  
     static app = null;
@@ -55,6 +55,10 @@ class DrawingManager {
         this.setDrawTool(new StarDraw(this.shapes));
     }
 
+    static selectCustomShape(ShapeClass) {
+        this.setDrawTool(new ShapeClass(this.shapes));
+    }
+
     static selectSelectTool() {
         this.setTool(new SelectState(this.overlay));
     }
@@ -76,6 +80,16 @@ class DrawingManager {
 
         this.cancelInProgress();
         HistoryManager.perform(new DeleteAction(shapes));
+    }
+
+    static restyleSelected(changes) {
+        const shapes = SelectionManager.getSelected();
+        if (shapes.length === 0) {
+            return;
+        }
+
+        this.cancelInProgress();
+        HistoryManager.perform(new StyleAction(shapes, changes));
     }
 
      static groupSelected() {
